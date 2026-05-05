@@ -3,32 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Texas Hold'em Poker</title>
+-   <title>Texas Hold'em Mobile</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Contenedor principal que escalaremos con CSS para el efecto de "zoom" en móvil -->
-    <div id="game-wrapper">
-        <div id="game-container">
-            <div id="table-area">
-    <img src="assets/images/tapete.png" id="poker-table" alt="Mesa de Poker">
-    
-    <!-- Cartas comunitarias en el centro -->
-    <div id="community-cards" class="card-row"></div>
+    <!-- El tapete de la mesa -->
+    <div id="game-board">
+        <div id="table-felt"></div>
+        
+        <!-- Zona para cartas comunitarias (Flop, Turn, River) -->
+        <div id="community-cards" class="card-area"></div>
 
-    <!-- Posiciones de los 6 jugadores (El 6 es el humano) -->
-    <div id="player-1" class="player-slot"></div>
-    <div id="player-2" class="player-slot"></div>
-    <div id="player-3" class="player-slot"></div>
-    <div id="player-4" class="player-slot"></div>
-    <div id="player-5" class="player-slot"></div>
-    <div id="player-6" class="player-slot human"></div> <!-- JUGADOR HUMANO -->
-</div>
+        <!-- Jugadores: El humano está abajo al centro, los otros alrededor -->
+        <div id="players-container">
+            <div id="player-0" class="player seat-top"></div> <!-- Bot/NPC 1 -->
+            <div id="player-1" class="player seat-left"></div>
+            <div id="player-2" class="player seat-right"></div>
+            <div id="player-3" class="player seat-bottom-left"></div>
+            <div id="player-4" class="player seat-bottom-right"></div>
+            <!-- El Humano -->
+            <div id="player-human" class="player seat-human">
+                <div class="status" id="human-status">Tu turno</div>
+                <div class="cards-slot" id="human-hand"></div>
+                <div class="info" ids="human-money">$1000</div>
             </div>
         </div>
+
+        <!-- Controles de acción -->
+        <div id="controls">
+            <button id="btn-fold" onclick="game.fold()">Fold</button>
+            <button id="btn-check" onclick="game.check()">Check/Call</button>
+            <button id="btn-raise" onclick="game.raise()">Raise</button>
+        </div>
+
+        <!-- Log de la partida -->
+        <div id="log">¡Bienvenido al Texas Hold'em!</div>
     </div>
 
-    <!-- Audio para música de fondo -->
+    <!-- Música (Autoplay requiere interacción previa) -->
     <audio id="bg-music" loop>
         <source src="assets/music/Minecraft Sweden.mp3" type="audio/mpeg">
     </audio>

@@ -1,94 +1,54 @@
-/* Reset básico */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-
-body {
-    background-color: #1a1a1a; /* Color oscuro para el fondo fuera del juego */
-    overflow: hidden; /* Evita scroll innecesario en móviles */
-    font-family: sans-serif;
+body, html {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background-color: #000; overflow: hidden; font-family: sans-serif;
 }
 
-/* El "Wrapper" es lo que permite centrar y escalar todo el juego */
-#game-Wrapper { 
-    width: 100vw; 
-    height: 100vh; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-}
+#game-lyout { position: relative; width: 100vw; height: 100vh; }
 
-/* El contenedor tiene un tamaño fijo (resolución de juego) */
-#game-container {
-    width: 1280px;
-    height: 720px;
-    position: relative; /* Para posicionar botones sobre la mesa */
-    background-color: #0d4d0d; /* Color verde por si falla la imagen del tapete */
-}
-
-#poker-table {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Asegura que el tapete cubra todo sin deformarse */
-}
-
-/* Capa de UI (Botones y Mensajes) - Superpuesta sobre la mesa */
-#ui-layer {
-    position: absolute;
-    top: 0; left: 0;
+/* El tapete debe cubrir toda la pantalla */
+#table-felt {
+    position: absolute; top: 0; left: 0;
     width: 100%; height: 100%;
-    pointer-events: none; /* Permite que los clics pasen a través de la capa si es necesario */
-}
-
-#status-msg {
-    position: absolute;
-    top: 20px; width: 100%;
-    text-align: center;
-    color: white;
-    font-size: 30px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-}
-
-#controls-container {
-    position: absolute;
-    bottom: 50px; width: 100%;
-    display: flex; justify-content: center; gap: 20px;
-    pointer-events: auto; /* ¡Importante! Para que los botones sí reciban clics */
-}
-
-.btn { padding: 15px 30px; font-size: 24px; cursor: pointer; border: none; border-radius: 8px; }
-.btn-red { background: #ff4d4d; color: white; }
-.btn-green { background: #2ecc71; color: white; }
-.btn-blue { background: 30%; background: #3498db; color: white; }
-
-/* Clase para ocultar controles al inicio */
-.hidden { display: none !important; }
-
-/* Contenedor de cartas comunitarias (el centro del tapete) */
-#community-cards {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    gap: 12px; /* Espacio entre los 5 recuadros blancos */
-}
-
-/* Estilo base para las cartas */
-.card {
-    width: 75px;  /* Ajusta según el tamaño de tus archivos C-x.png */
-    height: 105px;
+    background-image: url('assets/images/tapete.png');
     background-size: cover;
-    border-radius: 5px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-    transition: all 0.5s ease-in-out;
+    background-position: center;
 }
 
-/* Posiciones de los jugadores según los números de tu tapete */
-.player-slot { position: absolute; display: flex; gap: 5px; }
+/* Estilo de las cartas */
+.card {
+    width: 60px; height: 90px;
+    border-radius: 5px;
+    transition: transform 0.6s ease-in-out, left 1s, top 1s; /* Animación suave */
+    position: absolute;
+}
 
-#player-1 { bottom: 15%; left: 15%; }  /* Abajo Izquierda */
-#player-2 { top: 25%; left: 10%; }     /* Arriba Izquierda */
-#player-3 { top: 10%; left: 50%; transform: translateX(-50%); } /* Arriba Centro */
-#player-4 { top: 25%; right: 10%; }    /* Arriba Derecha */
-#player-5 { bottom: 15%; right: 15%; } /* Abajo Derecha */
-#player-6 { bottom: 5%; left: 50%; transform: translateX(-50%); } /* HUMANO (Abajo Centro) */
+/* Los jugadores se posicionan según su asiento */
+.player { position: absolute; text-align: center; color: white; }
+.seat-top { top: 5%; left: 45%; }
+.seat-left { left: 5%; top: 40%; }
+.seat-right { right: 5%; top: 40%; }
+.seat-bottom-left { bottom: 10%; left: 20%; }
+.seat-bottom-right { bottom: 10%; right: 20%; }
+.seat-human { bottom: 5%; left: 45%; border: 2px solid gold; padding: 5px; }
+
+/* Controles de la interfaz */
+#controls {
+    position: absolute; bottom: 10px; width: 100%;
+    display: flex; justify-content: center; gap: 20px;
+}
+
+button {
+    padding: -15px 30px; font-size: 1.2rem; border-radius: 10px;
+    border: none; cursor: pointer; background: #4CAF50; color: white;
+}
+
+#log {
+    position: absolute; top: 10px; left: 10px; width: 200px;
+    background: rgba(0,0,0,0.6); padding: 5px; font-size: 0.8rem; color: #ccc;
+}
+
+/* Animación de cartas al mesa */
+@keyframes cardMove {
+    from { transform: translateY(-200px) scale(1.5); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
