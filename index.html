@@ -11,17 +11,19 @@
     <div id="game-wrapper">
         <div id="game-container">
             <div id="table-area">
-                <img src="assets/images/tapete.png" id="poker-table" alt="Mesa de Poker">
-                <div id="cards-display"></div> <!-- Aquí aparecerán las cartas -->
-            </div>
+    <img src="assets/images/tapete.png" id="poker-table" alt="Mesa de Poker">
+    
+    <!-- Cartas comunitarias en el centro -->
+    <div id="community-cards" class="card-row"></div>
 
-            <div id="ui-layer">
-                <div id="status-msg">¡Bienvenido al Poker!</div>
-                <div id="controls-container" class="hidden">
-                    <button onclick="handleAction('fold')" class="btn btn-red">Retirarse</button>
-                    <button onclick="handleAction('call')" class="btn btn-green">Pagar</button>
-                    <button onclick="handleAction('raise')" class="btn btn-blue">Subir</button>
-                </div>
+    <!-- Posiciones de los 6 jugadores (El 6 es el humano) -->
+    <div id="player-1" class="player-slot"></div>
+    <div id="player-2" class="player-slot"></div>
+    <div id="player-3" class="player-slot"></div>
+    <div id="player-4" class="player-slot"></div>
+    <div id="player-5" class="player-slot"></div>
+    <div id="player-6" class="player-slot human"></div> <!-- JUGADOR HUMANO -->
+</div>
             </div>
         </div>
     </div>

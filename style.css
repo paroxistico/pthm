@@ -1,6 +1,7 @@
 /* Reset básico */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+
 body {
     background-color: #1a1a1a; /* Color oscuro para el fondo fuera del juego */
     overflow: hidden; /* Evita scroll innecesario en móviles */
@@ -61,3 +62,33 @@ body {
 
 /* Clase para ocultar controles al inicio */
 .hidden { display: none !important; }
+
+/* Contenedor de cartas comunitarias (el centro del tapete) */
+#community-cards {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 12px; /* Espacio entre los 5 recuadros blancos */
+}
+
+/* Estilo base para las cartas */
+.card {
+    width: 75px;  /* Ajusta según el tamaño de tus archivos C-x.png */
+    height: 105px;
+    background-size: cover;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    transition: all 0.5s ease-in-out;
+}
+
+/* Posiciones de los jugadores según los números de tu tapete */
+.player-slot { position: absolute; display: flex; gap: 5px; }
+
+#player-1 { bottom: 15%; left: 15%; }  /* Abajo Izquierda */
+#player-2 { top: 25%; left: 10%; }     /* Arriba Izquierda */
+#player-3 { top: 10%; left: 50%; transform: translateX(-50%); } /* Arriba Centro */
+#player-4 { top: 25%; right: 10%; }    /* Arriba Derecha */
+#player-5 { bottom: 15%; right: 15%; } /* Abajo Derecha */
+#player-6 { bottom: 5%; left: 50%; transform: translateX(-50%); } /* HUMANO (Abajo Centro) */

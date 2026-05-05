@@ -59,3 +59,37 @@ window.onload = () => {
     document.getElementById('controls-container').classList.remove('hidden');
     resizeGame();
 };
+
+// Configuración de los 6 jugadores
+const players = [
+    { id: 1, name: "Bot 1", chips: 1000 },
+    { id: 2, name: "Bot 2", chips: 1000 },
+    { id: 3, name: "Bot 3", chips: 1000 },
+    { id: 4, name: "Bot 4", chips: 1000 },
+    { id: 5, name: "Bot 5", chips: 1000 },
+    { id: 6, name: "Tú", chips: 1000 } // Humano
+];
+
+function dealInitialCards() {
+    players.forEach(player => {
+        // Repartimos dos cartas a cada uno
+        for(let i=0; i<2; i++) {
+            const cardData = deck.pop();
+            // Solo mostramos (isFaceUp = true) si es el jugador 6[cite: 2]
+            const isVisible = (player.id === 6); 
+            renderCard(`player-${player.id}`, cardData, isVisible);
+        }
+    });
+}
+
+function renderCard(containerId, cardName, isFaceUp) {
+    const container = document.getElementById(containerId);
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card';
+    
+    // Usamos tus nombres de archivo
+    const imgName = isFaceUp ? `${cardName}.png` : 'Back-R.png';
+    cardDiv.style.backgroundImage = `url('assets/images/${imgName}')`;
+    
+    container.appendChild(cardDiv);
+}
