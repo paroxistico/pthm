@@ -14,7 +14,8 @@ function resizeGame() {
     const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
     
     // Aplicamos transformación al contenedor principal (esto mueve todo: botones y mesa)
-    wrapper.style.transform = `translate(-50%, -5-scale(${scale}))`;
+    wrapper.style.transformOrigin = "center"; 
+    wrapper.style.transform = `scale(${scale})`;
 }
 
 /**
@@ -54,3 +55,7 @@ window.addEventListener('resize', resizeGame);
 
 // Ejecutar ajuste inicial al cargar y un pequeño delay por seguridad
 setTimeout(resizeGame, 100);
+window.onload = () => {
+    document.getElementById('controls-container').classList.remove('hidden');
+    resizeGame();
+};
