@@ -273,8 +273,7 @@ async function dealCardToPlayer(playerIndex, isBack) {
 
 function slideToTarget(el, targetSelector) {
     const rect = el.getBoundingClientRect();
-    // Forzar reflow para que CSS capture la posición inicial absoluta
-    void offsetWidth; 
+    void el.offsetWidth; // ✅ Corregido: fuerza reflow correctamente
     setTimeout(() => {
         $(targetSelector).style.display = 'flex';
         $(targetSelector).appendChild(el);
@@ -448,17 +447,23 @@ function updateUI(activePlayer) {
 }
 
 function enableControls(active, toCall, maxChips) {
-    const btns = $$('#controls-panel button');
+    const btnCheck = document.querySelector('[data-action="check-call"]');
+    const btnRaise = document.querySelector('[data-action="raise"]');
+    const btnFold  = document.querySelector('[data-action="fold"]');
+    
     if(!active){ 
-        btns.forEach(b=>b.disabled=true); return; 
+        [btnCheck, btnRaise, btnFold].forEach(b => b.disabled = true); 
+        return; 
     }
     
-    // Lógica de habilitado según reglas estrictas
-    $('#btn-check-call').disabled = toCall <= 0 ? false : true;
-    $('#btn-raise').disabled = maxChips < BLINDS.big*2 || gameState.phase === 'showdown';
-    if(!$('#btn-raise').disabled) $('.bet-amount').textContent = Math.min(maxChips, toCall + BLINDS.big);
+    btnCheck.disabled = toCall <= 0 ? false : true;
+    btnRaise.disabled = maxChips < BLINDS.big*2 || gameState.phase === 'showdown';
     
-    btns.forEach(b=>{
+    if(!btnRaise.disabled) {
+        document.querySelector('.bet-amount').textContent = Math.min(maxChips, toCall + BLINDS.big);
+    }
+    
+    [btnCheck, btnRaise, btnFold].forEach(b => {
         b.onclick = () => { 
             window.lastAction = b.dataset.action;
             enableControls(false);
@@ -466,6 +471,7 @@ function enableControls(active, toCall, maxChips) {
         };
     });
 }
+
 
 // Inicialización tras interacción (política audio/animación móvil)
 $('#btn-start').addEventListener('click', async () => {

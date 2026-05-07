@@ -11,10 +11,16 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI
 /* =========================================
    OVERLAY DE INICIO (POLÍTICA AUDIO/ANIMACIÓN)
    ========================================= */
-.overlay { position: fixed; inset: 0; background: rgba(10, 48, 76, 0.92); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; transition: opacity 0.5s ease; }
+.overlay { 
+    position: fixed; inset: 0; background: rgba(10, 48, 76, 0.92); 
+    display: flex; flex-direction: column; justify-content: center; align-items: center; 
+    z-index: 100; transition: opacity 0.5s ease, visibility 0.5s ease; 
+    opacity: 1; /* Valor inicial explícito */
+}
 .overlay.active { pointer-events: auto; visibility: visible; }
-#btn-start { padding: 18px 36px; font-size: clamp(1rem, 4vw, 1.4rem); background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-weight: bold; }
-.overlay p { margin-top: 16px; font-size: clamp(0.9rem, 3vw, 1.1rem); color: #bdc3c7; text-align: center; padding: 0 24px; line-height: 1.5; }
+/* ✅ Nueva regla: oculta el overlay cuando se quita .active */
+.overlay:not(.active) { opacity: 0; visibility: hidden; }
+
 
 /* =========================================
    CONTENEDOR PRINCIPAL & TAPETE
