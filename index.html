@@ -2,41 +2,67 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
+    <!-- Optimizado para móvil en horizontal -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="screen-orientation" content="landscape">
     <title>Texas Hold'em Poker</title>
+    
+    <!-- Hoja de estilos -->
     <link rel="stylesheet" href="style.css" />
+    
+    <!-- Favicon opcional (ajusta si lo tienes) -->
     <link rel="icon" type="image/png" sizes="32x32" href="assets/images/Back-R.png">
 </head>
+
 <body>
+    <!-- Pantalla de inicio para activar audio y juego (política moderna del navegador) -->
     <div id="start-overlay" class="overlay active">
         <button id="btn-start">🃏 Iniciar Partida</button>
         <p>Gira el dispositivo a horizontal si es necesario.</p>
     </div>
 
+    <!-- Contenedor principal del juego -->
     <main id="game-container">
+        
+        <!-- Tapete de la mesa (fondo por CSS, pero div para posicionamiento) -->
         <section class="table-surface"></section>
-        <div id="community-cards" class="card-row"></div>
 
+        <!-- Cartas comunitarias (Flop, Turn, River) -->
+        <div id="community-cards" class="card-row">
+            <!-- Se llenarán dinámicamente con JS -->
+        </div>
+
+        <!-- Pozo / Pot y Ciegas info -->
         <section id="pot-info">
             <span>Pozo: $<strong id="current-pot">0</strong></span>
-            <small>Ciega: <span id="blinds-display">$10/$20</span></small>
+            <small>Ciega Pequeña/Grande: <span id="blinds-display">$1/$2</span></small>
         </section>
 
-        <div id="players-container"></div>
+        <!-- Contenedor de jugadores (6 posiciones alrededor del tapete) -->
+        <div id="players-container">
+            <!-- Se generarán dinámicamente con JS, pero estructura base: -->
+            <!-- <figure class="player-seat" data-index="0"></figure> ... hasta 5 -->
+        </div>
+
+        <!-- Origen de animación (mazo virtual) -->
         <div id="deck-source" class="hidden">🂠</div>
 
+        <!-- Panel de control del jugador humano -->
         <section id="controls-panel">
-            <button id="btn-check-call" data-action="check-call" disabled>Chequear/Ligar</button>
-            <button id="btn-raise" data-action="raise" disabled>Apostar $<span class="bet-amount"></span></button>
-            <button id="btn-fold" data-action="fold" disabled>Doblar</button>
+            <button data-action="check-call" disabled>Chequear/Ligar</button>
+            <button data-action="raise" disabled>Apostar $<span class="bet-amount"></span></button>
+            <button data-action="fold" disabled>Doblar</button>
         </section>
+
     </main>
 
+    <!-- Música de fondo -->
     <audio id="bg-music" loop preload="auto">
         <source src="assets/music/Minecraft Sweden.mp3" type="audio/mpeg">
+        Tu navegador no soporta audio HTML5.
     </audio>
 
+    <!-- Lógica del juego (se cargará en la Parte 2 y 3) -->
     <script src="script.js"></script>
 </body>
 </html>
