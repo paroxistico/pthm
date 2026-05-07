@@ -1,10 +1,16 @@
+:root {
+    --primary-color: #4CAF50;
+    --background-color: #1a1a1a;
+    --text-color: white;
+}
+
 body {
     margin: 0;
     padding: 0;
-    background-color: #1a1a1a;
+    background-color: var(--background-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
-    color: white;
+    color: var(--text-color);
 }
 
 #game-container {
@@ -49,9 +55,8 @@ body {
 #player-0 { bottom: 20px; left: 50%; transform: translateX(-50%); }
 /* Bots arriba */
 #player-1 { top: 10px; left: 10%; }
-#player-ly { top: 10px; right: 10%; } /* Esto es relativo, lo ajustaremos en el JS o CSS */
+#player-3 { top: 10px; right: 10%; } /* Corrección de la id del bot */
 #player-2 { top: 10px; left: 50%; transform: translateX(-50%); }
-#player-3 { top: 10px; right: 10%; }
 
 .card-slot {
     width: 60px;
@@ -81,8 +86,9 @@ body {
     cursor: pointer;
     border-radius: 5px;
     border: none;
-    background: #4CAF50;
+    background: var(--primary-color);
     color: white;
+    transition: background 0.3s ease;
 }
 
 #controls button:hover { background: #45a049; }

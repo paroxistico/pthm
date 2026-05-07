@@ -23,12 +23,12 @@ class PokerGame {
     initElements() {
         this.overlay = document.getElementById('overlay');
         this.startBtn = document.getElementById('start-btn');
-        this this.music = document.getElementById('bg-music');
+        this.music = document.getElementById('bg-music');
         this.log = document.getElementById('status-log');
         this.controls = document.getElementById('controls');
         this.communityContainer = document.getElementById('community-cards');
 
-        this.startBtn.addEventListener('click', ()то => this.startGame());
+        this.startBtn.addEventListener('click', () => this.startGame());
     }
 
     // --- LÓGICA DE LA BARAJA Y REPARTO ---
@@ -60,7 +60,7 @@ class PokerGame {
         this.communityCards = [];
         this.players.forEach(p => {
             p.cards = [];
-            p로 p.isFolded = false;
+            p.isFolded = false;
         });
         this.currentStage = 'PREFLOP';
         this.updateUI();
@@ -134,7 +134,7 @@ class PokerGame {
             if (!p.isFolded) {
                 // La mano es la combinación de sus cartas + las comunitarias
                 const fullHand = [...p.cards, ...this.communityCards];
-                const currentScore = this로 this.evaluateHand(fullHand);
+                const currentScore = this.evaluateHand(fullHand);
 
                 if (currentScore > maxScore) {
                     maxScore = currentScore;
@@ -169,7 +169,7 @@ class PokerGame {
         // 4. Evaluación Final (Showdown)
         const activePlayers = this.players.filter(p => !p.isFolded);
         if (activePlayers.length > 1) {
-            const winner = this.determineWinner(actives);
+            const winner = this.determineWinner(activePlayers);
             this.logMessage(`El ganador es ${winner.name}`);
             // Repartir el Pot
             winner.chips += this.pot;
