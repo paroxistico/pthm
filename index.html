@@ -1,68 +1,74 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang=" 그리고 "es">
 <head>
-    <meta charset="UTF-8" />
-    <!-- Optimizado para móvil en horizontal -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="screen-orientation" content="landscape">
-    <title>Texas Hold'em Poker</title>
-    
-    <!-- Hoja de estilos -->
-    <link rel="stylesheet" href="style.css" />
-    
-    <!-- Favicon opcional (ajusta si lo tienes) -->
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/Back-R.png">
+    <meta charset="UTF-8">
+    <meta name pair="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Texas Hold'em Poker Pro</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <!-- Pantalla de inicio para activar audio y juego (política moderna del navegador) -->
-    <div id="start-overlay" class="overlay active">
-        <button id="btn-start">游戏技巧 Iniciar Partida</button>
-        <p>Gira el dispositivo a horizontal si es necesario.</p>
+
+    <div id="game-container">
+        <!-- Pantalla de Inicio / Overlay -->
+        <div id="overlay">
+            <h1>Texas Hold'em</h1>
+            <button id="start-btn">Empezar Partida</button>
+        </div>
+
+        <!-- Mesa de Juego -->
+        <div id="poker-table">
+            <div class="community-cards" id="community-cards"></div>
+            
+            <!-- Jugadores (Posiciones fijas) -->
+            <div class="player" id="player-0" data-role="human">
+                <div class="card-slot"></div>
+                <div class="player-info">
+                    <span class="name">Tú</span>
+                    <span class="chips">1000€</span>
+                </div>
+            </div>
+
+            <div class="player" id="player-1" data-role="cpu">
+                <div class="card-slot"></div>
+                <div class="player-info">
+                    <span class="name">Bot 1</span>
+                    <span class="chips">1000€</span>
+                </div>
+            </div>
+
+            <div class="player" id="player-2" data-role="cpu">
+                <div class="card-slot"></div>
+                <div class="player-info">
+                    <span class="name">Bot 2</span>
+                    <span class="chips">1000€</span>
+                </div>
+            </div>
+
+            <div class="player" id="player-3" data-role="cpu">
+                <div class="card-slot"></div>
+                <div class="player-info">
+                    <span class="name">Bot 3</span>
+                    <span class="chips">1000€</span>
+                </div>
+            </div>
+
+            <!-- Acciones del Jugador -->
+            <div id="controls" class="hidden">
+                <button onclick="game.fold()">Fold</button>
+                <button onclick="game.call()">Check/Call</button>
+                <button onclick="game.raise()">Raise</button>
+            </div>
+
+            <!-- Log de mensajes -->
+            <div id="status-log"></div>
+        </div>
     </div>
 
-    <!-- Contenedor principal del juego -->
-    <main id="game-container">
-        
-        <!-- Tapete de la mesa (fondo por CSS, pero div para posicionamiento) -->
-        <section class="table-surface"></section>
-
-        <!-- Cartas comunitarias (Flop, Turn, River) -->
-        <div id="community-cards" class="card-row">
-            <!-- Se llenarán dinámicamente con JS -->
-        </div>
-
-        <!-- Pozo / Pot y Ciegas info -->
-        <section id="pot-info">
-            <span>Pozo: $<strong id="current-pot">0</strong></span>
-            <small>Ciega Pequeña/Grande: <span id="blinds-display">$1/$2</span></small>
-        </section>
-
-        <!-- Contenedor de jugadores (6 posiciones alrededor del tapete) -->
-        <div id="players-container">
-            <!-- Se generarán dinámicamente con JS, pero estructura base: -->
-            <!-- <figure class="player-seat" data-index="0"></figure> ... hasta 5 -->
-        </div>
-
-        <!-- Origen de animación (mazo virtual) -->
-        <div id="deck-source" class="hidden">🂠</div>
-
-        <!-- Panel de control del jugador humano -->
-        <section id="controls-panel">
-            <button data-action="check-call" disabled>Chequear/Ligar</button>
-            <button data-action="raise" disabled>Apostar $<span class="bet-amount"></span></button>
-            <button data-action="fold" disabled>Doblar</button>
-        </section>
-
-    </main>
-
-    <!-- Música de fondo -->
-    <audio id="bg-music" loop preload="auto">
+    <!-- Audio de fondo -->
+    <audio id="bg-music" loop>
         <source src="assets/music/Minecraft Sweden.mp3" type="audio/mpeg">
-        Tu navegador no soporta audio HTML5.
     </audio>
 
-    <!-- Lógica del juego (se cargará en la Parte 2 y 3) -->
     <script src="script.js"></script>
 </body>
 </html>
