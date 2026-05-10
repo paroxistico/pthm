@@ -28,7 +28,9 @@ class PokerGame {
         this.controls = document.getElementById('controls');
         this.communityContainer = document.getElementById('community-cards');
 
-        this.startBtn.addEventListener('click', () => this.startGame());
+        if (this.startBtn) {
+            this.startBtn.addEventListener('click', () => this.startGame());
+        }
     }
 
     // --- LÓGICA DE LA BARAJA Y REPARTO ---
@@ -50,9 +52,15 @@ class PokerGame {
     }
 
     async startGame() {
+        console.log("🎵 Iniciando partida...");
         this.overlay.classList.add('hidden');
-        this.music.play();
-        this.resetTable();
+        try {
+            await this.music.play();
+        } catch (e) {
+            console.warn("Audio autoplay bloqueado o error:", e);
+        }
+        // playRound() ya incluye resetTable() internamente
+        await this.playRound();
     }
 
     resetTable() {
@@ -64,78 +72,55 @@ class PokerGame {
         });
         this.currentStage = 'PREFLOP';
         this.updateUI();
-        this.logMessage("Nueva mano. ¡Buena suerte!");
+        this.logMessage("🃏 Nueva mano. ¡Buena suerte!");
     }
 
     // --- LÓGICA DE EVALUACIÓN (EL CORAZÓN DEL JUEGO) ---
 
-    /**
-     * Esta función evalúa una mano de 5 cartas y devuelve un "score".
-     * El score es un número alto para manos fuertes (Royal Flush) 
-     * y bajo para manos débiles (High Card).
-     */
     evaluateHand(cardArray) {
-        // Ordenar por valor de forma descendente para facilitar detección de pares/escalas
+        if (!cardArray || cardArray.length < 5) return 0;
+        
         const sorted = [...cardArray].sort((a, b) => b.value - a.value);
         
-        // Contar repeticiones de valores (para Pairs, Trips, Quads)
         const counts = {};
         sorted.forEach(c => counts[c.value] = (counts[c.value] || 0) + 1);
-        const valuesOnly = sorted.map(c => c.value);
 
-        // Lógica de detección por fuerza (de mayor a menor)
-        // 1. Royal Flush / Straight Flush
-        // 2. Four of a Kind
-        // 3. Full House
-        // 4. Flush
-        // _Aquí simplificamos el cálculo para la lógica del juego_
-        
         let score = 0;
 
-        // Ejemplo de detección de Full House (3 de un valor + 2 de otro)
         const countsArr = Object.values(counts);
         if (countsArr.includes(3) && countsArr.includes(2)) score += 700; // Full House
         if (countsArr.includes(4)) score += 800; // Four of a Kind
         
-        // Detección de Flush (5 cartas mismo palo)
         const suitCount = sorted.reduce((acc, c) => {
             acc[c.suit] = (acc[c.suit] || 0) + 1;
             return acc;
         }, {});
-        if (Object.values(suitCount).some(v => v >= 5)) score += 600;
+        if (Object.values(suitCount).some(v => v >= 5)) score += 600; // Flush
 
-        // Detección de Escalera (Straight)
-        // Comprobamos si hay 5 valores consecutivos
         let straightCount = 1;
         for(let i=0; i<sorted.length-1; i++) {
             if(sorted[i].value === sorted[i+1].value + 1) straightCount++;
             else straightCount = 1;
         }
-        if (straightCount >= 5) score += 400;
+        if (straightCount >= 5) score += 400; // Straight
 
-        // Detección de Tríos/Pares
-        if (countsArr.includes(3)) score += 300;
-        if (countsArr.includes(2)) score += 100;
+        if (countsArr.includes(3)) score += 300; // Trips
+        if (countsArr.includes(2)) score += 100; // Pair
 
-        // Sumar valor de la carta más alta para desempatar
-        score += sorted[0].value;
+        score += sorted[0].value; // High card tie-breaker
 
         return score;
     }
 
-    /**
-     * Determina el ganador entre varios jugadores
-     */
     determineWinner(activePlayers) {
         let winner = null;
         let maxScore = -1;
 
         activePlayers.forEach(p => {
             if (!p.isFolded) {
-                // La mano es la combinación de sus cartas + las comunitarias
                 const fullHand = [...p.cards, ...this.communityCards];
                 const currentScore = this.evaluateHand(fullHand);
-
+                
                 if (currentScore > maxScore) {
                     maxScore = currentScore;
                     winner = p;
@@ -153,25 +138,32 @@ class PokerGame {
         
         // 1. Repartir cartas iniciales (Pre-flop)
         this.players.forEach(p => {
-            if(p.role === 'human' || p.role === 'cpu') {
-                // Aquí se reparten las cartas pero las del humano se ven, las de los bots no
-                p.cards = [this.drawCard(), this.drawCard()];
-            }
+            p.cards = [this.drawCard(), this.drawCard()];
         });
+        this.updateUI();
+        this.logMessage("📥 Cartas repartidas.");
 
-        // 2. Fase de Apuestas (Flop, Turn, River)
+        // 2. Fase de Apuestas (Simulada con delay para interacción)
         await this.bettingPhase();
 
-        // 3. Mostrar cartas comunitarias
+        // 3. Flop: Mostrar 3 cartas comunitarias
         this.communityCards = [this.drawCard(), this.drawCard(), this.drawCard()];
         this.updateUI();
+        this.logMessage("🃏 Flop repartido.");
         
-        // 4. Evaluación Final (Showdown)
+        await this.bettingPhase(); // Segunda ronda de apuestas
+
+        // 4. Showdown
         const activePlayers = this.players.filter(p => !p.isFolded);
         if (activePlayers.length > 1) {
             const winner = this.determineWinner(activePlayers);
-            this.logMessage(`El ganador es ${winner.name}`);
-            // Repartir el Pot
+            this.logMessage(`🏆 El ganador es ${winner.name}`);
+            winner.chips += this.pot;
+            this.pot = 0;
+            this.updateUI();
+        } else if (activePlayers.length === 1) {
+            const winner = activePlayers[0];
+            this.logMessage(`🏆 Todos foldearon. Gana ${winner.name}`);
             winner.chips += this.pot;
             this.pot = 0;
         }
@@ -180,67 +172,106 @@ class PokerGame {
     }
 
     drawCard() {
-        const card = this.deck.pop();
-        return card;
+        if (this.deck.length === 0) this.createDeck(); // Fallback por si se agota
+        return this.deck.pop();
     }
 
     async bettingPhase() {
-        // Simulación de turnos de apuestas (esto sería un loop de tiempo)
-        // En una app real, aquí esperarías el input del usuario
-        this.logMessage("Esperando acciones...");
-        // Lógica para el botón "Call/Fold" del humano...
+        // Simulación de turnos de apuestas con delay para que la UI sea usable
+        this.logMessage("⏳ Esperando acciones del jugador y bots...");
+        if (this.controls) this.controls.classList.remove('hidden');
+        
+        return new Promise(resolve => setTimeout(resolve, 2500));
     }
 
     updateUI() {
-        // Actualizar la mesa y los chips
         this.players.forEach(p => {
             const el = document.getElementById(`player-${p.id}`);
             if(el) {
                 el.querySelector('.chips').textContent = `${p.chips}€`;
                 const slot = el.querySelector('.card-slot');
                 slot.innerHTML = '';
+                
                 p.cards.forEach(c => {
                     const img = document.createElement('img');
+                    // Fallback por si la imagen no existe en assets
                     img.src = `assets/images/${c.suit}-${c.value}.png`;
                     img.className = 'card-visual';
+                    img.alt = `${c.value} ${c.suit}`;
+                    img.onerror = () => {
+                        img.style.backgroundColor = '#eee';
+                        img.style.border = '2px solid #333';
+                        img.src = `https://via.placeholder.com/50x70?text=${c.value}${c.suit}`;
+                    };
                     slot.appendChild(img);
                 });
             }
         });
+
+        // Actualizar cartas comunitarias en el centro de la mesa
+        if (this.communityContainer) {
+            this.communityContainer.innerHTML = '';
+            this.communityCards.forEach(c => {
+                const img = document.createElement('img');
+                img.src = `assets/images/${c.suit}-${c.value}.png`;
+                img.className = 'card-visual community';
+                img.alt = `${c.value} ${c.suit}`;
+                img.onerror = () => {
+                    img.style.backgroundColor = '#eee';
+                    img.style.border = '2px solid #333';
+                    img.src = `https://via.placeholder.com/50x70?text=${c.value}${c.suit}`;
+                };
+                this.communityContainer.appendChild(img);
+            });
+        }
     }
 
     logMessage(msg) {
         const p = document.createElement('p');
         p.textContent = `> ${msg}`;
-        this.log.prepend(p);
+        if (this.log) this.log.prepend(p);
     }
 
     checkGameOver() {
         const human = this.players[0];
         if (human.chips <= 0) {
-            this.logMessage("FIN DEL JUEGO: Has quebrado.");
+            this.logMessage("🔚 FIN DEL JUEGO: Has quebrado.");
             this.isGameOver = true;
+            if (this.controls) this.controls.classList.add('hidden');
+        } else {
+            // Siguiente ronda automática tras pausa
+            setTimeout(() => {
+                if (!this.isGameOver) this.playRound();
+            }, 3000);
         }
-        // Si los otros bots se quedan sin dinero, el humano también pierde o gana
     }
 
     // --- MÉTODOS PARA EL HTML (Atados a botones) ---
     fold() {
         const human = this.players[0];
         human.isFolded = true;
-        this.logMessage("Has foldeado.");
-        // Lógica de la siguiente fase o fin de mano...
+        this.logMessage("📂 Has foldeado.");
+        if (this.controls) this.controls.classList.add('hidden');
     }
 
     call() {
-        this.logMessage("Has pagado.");
-        // Aquí dispararías el flujo de la partida
+        this.logMessage("💰 Has pagado (Call).");
+        if (this.controls) this.controls.classList.add('hidden');
     }
 
     raise() {
-        this.logMessage("Has subido!");
+        const human = this.players[0];
+        if (human.chips >= 100) {
+            this.pot += 100;
+            human.chips -= 100;
+            this.logMessage("📈 ¡Has subido la apuesta!");
+            this.updateUI();
+        } else {
+            this.logMessage("💸 No tienes suficientes fichas para subir.");
+        }
+        if (this.controls) this.controls.classList.add('hidden');
     }
 }
 
-// Inicialización
+// Inicialización global
 const game = new PokerGame();
