@@ -15,7 +15,7 @@ class PokerGame {
         ];
         this.currentStage = 'PREFLOP';
         this.isGameOver = false;
-        this.isRoundActive = false; // Evita bucles automáticos descontrolados
+        this.actionResolver = null; // 🆕 Resuelve la promesa cuando el jugador actúa
 
         this.initElements();
     }
@@ -104,9 +104,6 @@ class PokerGame {
     }
 
     async playRound() {
-        if (this.isRoundActive) return;
-        this.isRoundActive = true;
-        
         this.createDeck();
         this.resetTable();
         
@@ -114,29 +111,30 @@ class PokerGame {
         this.updateUI();
         this.logMessage("📥 Cartas repartidas.");
 
-        // Fase 1: Pre-Flop apuestas
+        // 🟢 Pre-Flop
         await this.bettingPhase("Pre-Flop");
 
-        // Flop
+        // 🟢 Flop
         this.communityCards = [this.drawCard(), this.drawCard(), this.drawCard()];
         this.updateUI();
         this.logMessage("🃏 Flop repartido.");
         await this.bettingPhase("Flop");
 
-        // Turn & River (simulados con delay)
+        // 🟢 Turn
         this.communityCards.push(this.drawCard());
         this.updateUI();
         this.logMessage("🃏 Turn repartido.");
         await this.bettingPhase("Turn");
 
+        // 🟢 River
         this.communityCards.push(this.drawCard());
         this.updateUI();
         this.logMessage("🃏 River repartido.");
         await this.bettingPhase("River");
 
-        // Showdown
+        // 🏁 Showdown
         this.currentStage = 'SHOWDOWN';
-        this.updateUI(); // Ahora las cartas de CPU se revelan
+        this.updateUI(); 
 
         const activePlayers = this.players.filter(p => !p.isFolded);
         if (activePlayers.length > 1) {
@@ -160,12 +158,14 @@ class PokerGame {
         return this.deck.pop();
     }
 
+    // 🆕 BLOQUEA EL FLUJO HASTA QUE EL JUGADOR PULSE UN BOTÓN
     async bettingPhase(phaseName) {
-        this.logMessage(`⏳ Fase de apuestas: ${phaseName}`);
+        this.logMessage(`⏳ Fase: ${phaseName}. Tu turno.`);
         if (this.controls) this.controls.classList.remove('hidden');
         
-        // Espera simulada para que puedas interactuar con los botones
-        return new Promise(resolve => setTimeout(resolve, 2000));
+        return new Promise((resolve) => {
+            this.actionResolver = resolve; // Guardamos el resolver para que los botones lo disparen
+        });
     }
 
     updateUI() {
@@ -178,7 +178,6 @@ class PokerGame {
                 
                 p.cards.forEach(c => {
                     const img = document.createElement('img');
-                    // OCULTAR CARTAS DE CPU HASTA SHOWDOWN
                     if (p.role === 'cpu' && this.currentStage !== 'SHOWDOWN') {
                         img.className = 'card-visual card-back';
                     } else {
@@ -228,38 +227,79 @@ class PokerGame {
             return;
         }
 
-        // Siguiente mano MANUAL tras pausa clara
+        // Pausa final y espera a que el usuario inicie nueva mano manualmente
         setTimeout(() => {
-            this.logMessage("💡 Pulsa 'Empezar Partida' de nuevo para la siguiente mano.");
+            this.logMessage("💡 Pulsa 'Empezar Partida' para la siguiente mano.");
             this.overlay.classList.remove('hidden');
             if (this.controls) this.controls.classList.add('hidden');
-            this.isRoundActive = false;
-        }, 3000);
+        }, 2500);
     }
 
+    // 🆕 BOTONES: Disparan el resolver y simulan respuesta de CPU
     fold() {
         const human = this.players[0];
         human.isFolded = true;
         this.logMessage("📂 Has foldeado.");
         if (this.controls) this.controls.classList.add('hidden');
+        this.simulateBotsAndContinue();
     }
 
     call() {
-        this.logMessage("💰 Has pagado (Call).");
+        const human = this.players[0];
+        const bet = 50;
+        if (human.chips >= bet) {
+            human.chips -= bet;
+            this.pot += bet;
+            this.logMessage(`💰 Has pagado ${bet}€.`);
+        } else {
+            this.logMessage("💸 No tienes suficientes fichas.");
+        }
         if (this.controls) this.controls.classList.add('hidden');
+        this.simulateBotsAndContinue();
     }
 
     raise() {
         const human = this.players[0];
-        if (human.chips >= 100) {
-            this.pot += 100;
-            human.chips -= 100;
-            this.logMessage("📈 ¡Has subido la apuesta!");
-            this.updateUI();
+        const bet = 100;
+        if (human.chips >= bet) {
+            human.chips -= bet;
+            this.pot += bet;
+            this.logMessage(`📈 ¡Has subido ${bet}€!`);
         } else {
             this.logMessage("💸 No tienes suficientes fichas para subir.");
         }
         if (this.controls) this.controls.classList.add('hidden');
+        this.simulateBotsAndContinue();
+    }
+
+    // 🆕 Simula turnos de los bots y continúa la ronda
+    simulateBotsAndContinue() {
+        this.logMessage("🤖 Bots evaluando...");
+        let delay = 0;
+        for (let i = 1; i < this.players.length; i++) {
+            const bot = this.players[i];
+            setTimeout(() => {
+                if (!bot.isFolded) {
+                    const action = Math.random();
+                    if (action > 0.3) { // 70% pagan
+                        const bet = 50;
+                        bot.chips -= bet;
+                        this.pot += bet;
+                        this.logMessage(`${bot.name} paga ${bet}€.`);
+                    } else {
+                        bot.isFolded = true;
+                        this.logMessage(`${bot.name} foldea.`);
+                    }
+                }
+                this.updateUI();
+            }, delay);
+            delay += 600; // Escalera de tiempos para realismo
+        }
+
+        // Tras los bots, se resuelve la promesa y sigue el flujo
+        setTimeout(() => {
+            if (this.actionResolver) this.actionResolver();
+        }, delay + 400);
     }
 }
 
