@@ -1,5 +1,6 @@
 /**
  * MOTOR DE JUEGO DE PÓKER TEXAS HOLD'EM
+ * Versión corregida - ÚNICA declaración de clase
  */
 
 class PokerGame {
@@ -16,7 +17,7 @@ class PokerGame {
         this.currentStage = 'PREFLOP';
         this.isGameOver = false;
         this.actionResolver = null;
-        this.lastWinnerMsg = ""; // 🆕 Para mostrarlo en el overlay
+        this.lastWinnerMsg = "";
 
         this.initElements();
     }
@@ -31,6 +32,8 @@ class PokerGame {
 
         if (this.startBtn) {
             this.startBtn.addEventListener('click', () => this.startGame());
+        } else {
+            console.warn("⚠️ start-btn no encontrado en el DOM");
         }
     }
 
@@ -51,9 +54,21 @@ class PokerGame {
 
     async startGame() {
         console.log("🎵 Iniciando partida...");
+        if (!this.overlay) return;
+        
         this.overlay.classList.add('hidden');
-        try { await this.music.play(); } catch (e) { console.warn("Audio:", e); }
-        await this.playRound();
+        try { 
+            if (this.music) await this.music.play(); 
+        } catch (e) { 
+            console.warn("Audio autoplay bloqueado o error:", e); 
+        }
+        
+        try {
+            await this.playRound();
+        } catch (err) {
+            console.error("❌ Error en playRound:", err);
+            this.logMessage(`⚠️ Error interno: ${err.message}`);
+        }
     }
 
     resetTable() {
@@ -181,7 +196,6 @@ class PokerGame {
             this.pot = 0;
         }
 
-        // 🆕 Mostrar en LOG y guardar para el overlay
         if (winnerMsg) {
             this.logMessage(winnerMsg);
             this.lastWinnerMsg = winnerMsg;
@@ -189,7 +203,6 @@ class PokerGame {
             this.logMessage("🤨 Final de ronda sin ganador claro.");
         }
 
-        // Pausa para leer antes de mostrar el overlay
         setTimeout(() => this.checkGameOver(), 2000);
     }
 
@@ -211,8 +224,11 @@ class PokerGame {
         this.players.forEach(p => {
             const el = document.getElementById(`player-${p.id}`);
             if(el) {
-                el.querySelector('.chips').textContent = `${p.chips}€`;
+                const chipsEl = el.querySelector('.chips');
+                if (chipsEl) chipsEl.textContent = `${p.chips}€`;
+                
                 const slot = el.querySelector('.card-slot');
+                if (!slot) return;
                 slot.innerHTML = '';
                 
                 p.cards.forEach(c => {
@@ -256,10 +272,9 @@ class PokerGame {
         p.textContent = `> ${msg}`;
         if (this.log) {
             this.log.prepend(p);
-            // 🆕 Forzar scroll al inicio para que siempre se vea el último mensaje
-            this.log.scrollTop = 0; 
+            try { this.log.scrollTop = 0; } catch(e) {}
         }
-        console.log(`[PokerLog] ${msg}`); // Debug extra
+        console.log(`[PokerLog] ${msg}`);
     }
 
     checkGameOver() {
@@ -271,7 +286,6 @@ class PokerGame {
             return;
         }
 
-        // 🆕 Mostrar resultado en el overlay antes de dejar iniciar nueva mano
         this.showOverlay(this.lastWinnerMsg || "Mano finalizada", "Pulsa para repartir de nuevo.");
     }
 
@@ -279,7 +293,6 @@ class PokerGame {
         const h1 = this.overlay.querySelector('h1');
         if (h1) h1.textContent = title;
         
-        // Añadir subtítulo si existe el botón pero no hay h2
         let sub = this.overlay.querySelector('.subtitle');
         if (!sub) {
             sub = document.createElement('p');
@@ -360,4 +373,5 @@ class PokerGame {
     }
 }
 
+// Instancia única global
 const game = new PokerGame();
