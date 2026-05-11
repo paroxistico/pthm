@@ -15,7 +15,7 @@ class PokerGame {
         ];
         this.currentStage = 'PREFLOP';
         this.isGameOver = false;
-        this.actionResolver = null; // 🆕 Resuelve la promesa cuando el jugador actúa
+        this.actionResolver = null;
 
         this.initElements();
     }
@@ -91,6 +91,34 @@ class PokerGame {
         return score;
     }
 
+    // 🆕 Detecta y devuelve el nombre de la mejor mano en español
+    getHandName(cards) {
+        const sorted = [...cards].sort((a,b) => b.value - a.value);
+        const counts = {};
+        sorted.forEach(c => counts[c.value] = (counts[c.value] || 0) + 1);
+        const cArr = Object.values(counts).sort((a,b) => b-a);
+
+        const suitCounts = {};
+        sorted.forEach(c => suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1);
+        const hasFlush = Object.values(suitCounts).some(v => v >= 5);
+
+        let uniqueVals = [...new Set(sorted.map(c=>c.value))].sort((a,b)=>b-a);
+        let hasStraight = false;
+        for(let i=0; i<=uniqueVals.length-5; i++) {
+            if(uniqueVals[i] - uniqueVals[i+4] === 4) { hasStraight = true; break; }
+        }
+
+        if (hasFlush && hasStraight) return "Escalera de Color";
+        if (cArr[0] === 4) return "Póker (Four of a Kind)";
+        if (cArr[0] === 3 && cArr[1] >= 2) return "Full House";
+        if (hasFlush) return "Color (Flush)";
+        if (hasStraight) return "Escalera (Straight)";
+        if (cArr[0] === 3) return "Trío (Three of a Kind)";
+        if (cArr[0] === 2 && cArr[1] === 2) return "Doble Pareja";
+        if (cArr[0] === 2) return "Pareja";
+        return "Carta Alta";
+    }
+
     determineWinner(activePlayers) {
         let winner = null, maxScore = -1;
         activePlayers.forEach(p => {
@@ -111,35 +139,32 @@ class PokerGame {
         this.updateUI();
         this.logMessage("📥 Cartas repartidas.");
 
-        // 🟢 Pre-Flop
         await this.bettingPhase("Pre-Flop");
 
-        // 🟢 Flop
         this.communityCards = [this.drawCard(), this.drawCard(), this.drawCard()];
         this.updateUI();
         this.logMessage("🃏 Flop repartido.");
         await this.bettingPhase("Flop");
 
-        // 🟢 Turn
         this.communityCards.push(this.drawCard());
         this.updateUI();
         this.logMessage("🃏 Turn repartido.");
         await this.bettingPhase("Turn");
 
-        // 🟢 River
         this.communityCards.push(this.drawCard());
         this.updateUI();
         this.logMessage("🃏 River repartido.");
         await this.bettingPhase("River");
 
-        // 🏁 Showdown
         this.currentStage = 'SHOWDOWN';
         this.updateUI(); 
 
         const activePlayers = this.players.filter(p => !p.isFolded);
         if (activePlayers.length > 1) {
             const winner = this.determineWinner(activePlayers);
-            this.logMessage(`🏆 El ganador es ${winner.name}`);
+            // 🆕 Mensaje con el tipo de mano ganadora
+            const winHandName = this.getHandName([...winner.cards, ...this.communityCards]);
+            this.logMessage(`🏆 El ganador es ${winner.name} con una ${winHandName}.`);
             winner.chips += this.pot;
             this.pot = 0;
             this.updateUI();
@@ -158,13 +183,12 @@ class PokerGame {
         return this.deck.pop();
     }
 
-    // 🆕 BLOQUEA EL FLUJO HASTA QUE EL JUGADOR PULSE UN BOTÓN
     async bettingPhase(phaseName) {
         this.logMessage(`⏳ Fase: ${phaseName}. Tu turno.`);
         if (this.controls) this.controls.classList.remove('hidden');
         
         return new Promise((resolve) => {
-            this.actionResolver = resolve; // Guardamos el resolver para que los botones lo disparen
+            this.actionResolver = resolve;
         });
     }
 
@@ -227,7 +251,6 @@ class PokerGame {
             return;
         }
 
-        // Pausa final y espera a que el usuario inicie nueva mano manualmente
         setTimeout(() => {
             this.logMessage("💡 Pulsa 'Empezar Partida' para la siguiente mano.");
             this.overlay.classList.remove('hidden');
@@ -235,7 +258,6 @@ class PokerGame {
         }, 2500);
     }
 
-    // 🆕 BOTONES: Disparan el resolver y simulan respuesta de CPU
     fold() {
         const human = this.players[0];
         human.isFolded = true;
@@ -272,7 +294,6 @@ class PokerGame {
         this.simulateBotsAndContinue();
     }
 
-    // 🆕 Simula turnos de los bots y continúa la ronda
     simulateBotsAndContinue() {
         this.logMessage("🤖 Bots evaluando...");
         let delay = 0;
@@ -281,7 +302,7 @@ class PokerGame {
             setTimeout(() => {
                 if (!bot.isFolded) {
                     const action = Math.random();
-                    if (action > 0.3) { // 70% pagan
+                    if (action > 0.3) { 
                         const bet = 50;
                         bot.chips -= bet;
                         this.pot += bet;
@@ -293,10 +314,9 @@ class PokerGame {
                 }
                 this.updateUI();
             }, delay);
-            delay += 600; // Escalera de tiempos para realismo
+            delay += 600;
         }
 
-        // Tras los bots, se resuelve la promesa y sigue el flujo
         setTimeout(() => {
             if (this.actionResolver) this.actionResolver();
         }, delay + 400);

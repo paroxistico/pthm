@@ -50,7 +50,7 @@ body {
 
 /* --- JUGADORES --- */
 .player { position: absolute; text-align: center; z-index: 2; }
-#player-0 { bottom: 110px; left: 50%; transform: translateX(-50%); } /* Subido para no tapar controles */
+#player-0 { bottom: 110px; left: 50%; transform: translateX(-50%); }
 #player-1 { top: 15px; left: 8%; }
 #player-2 { top: 15px; left: 50%; transform: translateX(-50%); }
 #player-3 { top: 15px; right: 8%; }
@@ -95,10 +95,13 @@ body {
 #controls button:hover { background: var(--primary-hover); transform: translateY(-2px); }
 #controls button:active { transform: translateY(0); }
 
-/* --- LOG --- */
+/* --- LOG (Movido a inferior izquierda) --- */
 #status-log {
-    position: absolute; top: 15px; left: 15px;
-    width: 220px; max-height: 180px;
+    position: absolute;
+    bottom: 15px; /* ← Cambiado de top a bottom */
+    left: 15px;
+    width: 240px;
+    max-height: 180px;
     background: rgba(0,0,0,0.6); padding: 10px;
     border-radius: 8px; font-size: 0.85rem;
     overflow-y: auto; z-index: 5; backdrop-filter: blur(2px);
